@@ -1,19 +1,26 @@
 import socket
 
 
-def listen(conn):
+def listen(conn, bytes=False):
     while True:
         data = conn.recv(1024)
         if data:
             conn.sendall(data)
+            if bytes:
+                return data
             return data.decode()
 
 
-def send(tosend, conn):
+def send(tosend, conn, bytes=False):
     while True:
-        conn.sendall(tosend.encode())
+        if not bytes:
+            conn.sendall(tosend.encode())
+        else:
+            conn.sendall(tosend)
         data = conn.recv(1024)
-        if tosend == data.decode():
+        if not bytes and tosend == data.decode():
+            break
+        elif bytes and tosend == data:
             break
 
 

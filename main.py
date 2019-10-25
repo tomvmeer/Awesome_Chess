@@ -4,6 +4,7 @@ import socket_server as server
 import socket_client as client
 import random
 import time
+import pickle
 
 black = (0, 0, 0)
 gray = (169, 169, 169)
@@ -357,6 +358,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     crashed = False
     conn = None
+    turn = False
     gamestate = 'waiting'
     playername = None
     opponent = None
@@ -369,7 +371,7 @@ if __name__ == '__main__':
         for event in events:
             if event.type == pygame.QUIT:
                 crashed = True
-            if gamestate == 'playing':
+            if gamestate == 'playing' and turn:
                 if event.type == pygame.MOUSEBUTTONDOWN and not selected and event.button == 1:
                     x, y = event.pos
                     oldx, oldy = get_square_from_click(x, y)
@@ -383,9 +385,18 @@ if __name__ == '__main__':
                     newx, newy = get_square_from_click(x, y)
                     if game_grid.move(oldx, oldy, newx, newy):
                         selected = False
+                        turn = False
+                        game_grid.squares = [i for i in reversed(game_grid.squares)]
+                        data = pickle.dumps(game_grid)
+                        server.send(data, conn, bytes=True)
+                        # Reverse it back for display on own screen next iteration.
+                        game_grid.squares = [i for i in reversed(game_grid.squares)]
                 elif event.type == pygame.MOUSEBUTTONDOWN and selected and event.button == 3:
                     game_grid.deselect()
                     selected = False
+            elif gamestate == 'playing' and not turn:
+                game_grid = pickle.loads(server.listen(conn, bytes=True))
+                turn = True
             elif gamestate == 'waiting':
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     x, y = event.pos
@@ -395,6 +406,9 @@ if __name__ == '__main__':
                         gamestate = 'host_waiting'
             elif gamestate == 'host_waiting':
                 pass
+            elif gamestate == 'joining':
+                pass
+
         if pygame.display.get_active():
             # Drawing the screen:
             if gamestate == 'playing':
@@ -403,15 +417,25 @@ if __name__ == '__main__':
                 draw_wait()
             elif gamestate == 'host_waiting':
                 if draw_hosting(events):
-                    team = random.randint(0, 1)
+                    # team = random.randint(0, 1)
+                    team = 0
                     time.sleep(2)
                     server.send('1' if team == 0 else '0', conn)
                     game_grid = grid(team)
                     gamestate = 'playing'
+                    if team == 0:
+                        turn = True
+                    else:
+                        draw_board(game_grid)
             elif gamestate == 'joining':
                 if draw_join(events):
                     game_grid = grid(team)
                     gamestate = 'playing'
+                    if team == 0:
+                        turn = True
+                    else:
+                        draw_board(game_grid)
+
             pygame.display.update()
             clock.tick(30)
 
