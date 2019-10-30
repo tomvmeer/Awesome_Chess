@@ -1,7 +1,6 @@
 import pygame
 import pygame_textinput
-import socket_server as server
-import socket_client as client
+import socket_comms as comms
 import random
 import time
 import pickle
@@ -289,9 +288,9 @@ def draw_hosting(events):
         textRect.center = xpos, ypos
         gameDisplay.blit(text, textRect)
         pygame.display.update()
-        opponent, conn = server.host_game(HOST, PORT)
+        opponent, conn = comms.host_game(HOST, PORT)
         time.sleep(1)
-        server.send(playername, conn)
+        comms.send(playername, conn)
     elif opponent and playername:
         font = pygame.font.Font('freesansbold.ttf', 32)
         text = font.render('Playing against: ' + opponent, True, black)
@@ -318,6 +317,7 @@ def draw_join(events):
         elif playername and not opponent and not conn:
             HOST = textinput.get_text()
             textinput.clear_text()
+
     if not playername:
         draw_button(90, 150, 250, 50, '', gameDisplay)
         gameDisplay.blit(textinput.get_surface(), (155, 103))
@@ -327,7 +327,7 @@ def draw_join(events):
         xpos, ypos = 300, 50
         textRect.center = xpos, ypos
         gameDisplay.blit(text, textRect)
-    if not opponent and playername and not conn and not HOST:
+    elif not opponent and playername and not conn and not HOST:
         draw_button(90, 150, 250, 50, '', gameDisplay)
         gameDisplay.blit(textinput.get_surface(), (155, 103))
         font = pygame.font.Font('freesansbold.ttf', 32)
@@ -336,11 +336,11 @@ def draw_join(events):
         xpos, ypos = 300, 50
         textRect.center = xpos, ypos
         gameDisplay.blit(text, textRect)
-    if not opponent and playername and not conn and HOST:
-        conn = client.connect(HOST, PORT, playername)
-        opponent = client.listen(conn)
-        team = int(client.listen(conn))
-    if opponent and playername and conn:
+    elif not opponent and playername and not conn and HOST:
+        conn = comms.connect(HOST, PORT, playername)
+        opponent = comms.listen(conn)
+        team = int(comms.listen(conn))
+    elif opponent and playername and conn:
         font = pygame.font.Font('freesansbold.ttf', 32)
         text = font.render('Playing against: ' + opponent, True, black)
         textRect = text.get_rect()
@@ -388,14 +388,14 @@ if __name__ == '__main__':
                         turn = False
                         game_grid.squares = [i for i in reversed(game_grid.squares)]
                         data = pickle.dumps(game_grid)
-                        server.send(data, conn, bytes=True)
+                        comms.send(data, conn, bytes=True)
                         # Reverse it back for display on own screen next iteration.
                         game_grid.squares = [i for i in reversed(game_grid.squares)]
                 elif event.type == pygame.MOUSEBUTTONDOWN and selected and event.button == 3:
                     game_grid.deselect()
                     selected = False
             elif gamestate == 'playing' and not turn:
-                game_grid = pickle.loads(server.listen(conn, bytes=True))
+                game_grid = pickle.loads(comms.listen(conn, bytes=True))
                 turn = True
             elif gamestate == 'waiting':
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -420,7 +420,7 @@ if __name__ == '__main__':
                     # team = random.randint(0, 1)
                     team = 0
                     time.sleep(2)
-                    server.send('1' if team == 0 else '0', conn)
+                    comms.send('1' if team == 0 else '0', conn)
                     game_grid = grid(team)
                     gamestate = 'playing'
                     if team == 0:
@@ -430,6 +430,7 @@ if __name__ == '__main__':
             elif gamestate == 'joining':
                 if draw_join(events):
                     game_grid = grid(team)
+                    time.sleep(2)
                     gamestate = 'playing'
                     if team == 0:
                         turn = True
