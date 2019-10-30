@@ -1,27 +1,6 @@
 import pygame
 
 
-def get_sprite(piece):
-    ''''Getting image of specific piece to blit onto screen.'''
-    sel = False
-    if piece[0] == 'b':
-        color = 'black'
-        piece = piece[1:]
-    elif piece[0] == 'w':
-        color = 'white'
-        piece = piece[1:]
-    elif piece[0] == 's':
-        color = 'black' if piece[1] == 'b' else 'white'
-        piece = piece[2:]
-        sel = True
-    elif piece[0] == '-':
-        color = 'black'  # color of selection indicator doesnt matter.
-        piece = piece[1:]
-    img = pygame.image.load(f'pieces/{color}/{piece}.png')
-    width, height = img.get_rect().size
-    return img, width, height, sel
-
-
 class Grid:
     def __init__(self, team):
         self.team = team
@@ -58,14 +37,14 @@ class Grid:
             if self.squares[y - 1][x - 1] is not None:
                 if x - 1 >= 0 and y - 1 >= 0:
                     if (self.squares[y - 1][x - 1][0] == 'w' and self.team == 1) or (
-                                    self.squares[y - 1][x - 1][0] == 'b' and self.team == 0):
+                            self.squares[y - 1][x - 1][0] == 'b' and self.team == 0):
                         self.squares[y - 1][x - 1] = 's' + self.squares[y - 1][x - 1]
                         success = True
             # Check front right:
             if self.squares[y - 1][x + 1] is not None:
                 if x + 1 < 8 and y - 1 >= 0:
                     if (self.squares[y - 1][x + 1][0] == 'w' and self.team == 1) or (
-                                    self.squares[y - 1][x + 1][0] == 'b' and self.team == 0):
+                            self.squares[y - 1][x + 1][0] == 'b' and self.team == 0):
                         self.squares[y - 1][x + 1] = 's' + self.squares[y - 1][x + 1]
                         success = True
             return success  # True if a valid move could be found for this piece, otherwise false.
@@ -87,7 +66,7 @@ class Grid:
                     self.squares[y - i][x - i] = '-selected'
                     success = True
                 elif (self.squares[y - i][x - i][0] == 'b' and self.team == 0) or (
-                                self.squares[y - i][x - i][0] == 'w' and self.team == 1):
+                        self.squares[y - i][x - i][0] == 'w' and self.team == 1):
                     self.squares[y - i][x - i] = 's' + self.squares[y - i][x - i]
                     success = True
                     break
@@ -101,7 +80,7 @@ class Grid:
                     self.squares[y - i][x + i] = '-selected'
                     success = True
                 elif (self.squares[y - i][x + i][0] == 'b' and self.team == 0) or (
-                                self.squares[y - i][x + i][0] == 'w' and self.team == 1):
+                        self.squares[y - i][x + i][0] == 'w' and self.team == 1):
                     self.squares[y - i][x + i] = 's' + self.squares[y - i][x + i]
                     success = True
                     break
@@ -115,7 +94,7 @@ class Grid:
                     self.squares[y + i][x - i] = '-selected'
                     success = True
                 elif (self.squares[y + i][x - i][0] == 'b' and self.team == 0) or (
-                                self.squares[y + i][x - i][0] == 'w' and self.team == 1):
+                        self.squares[y + i][x - i][0] == 'w' and self.team == 1):
                     self.squares[y + i][x - i] = 's' + self.squares[y + i][x - i]
                     success = True
                     break
@@ -129,7 +108,7 @@ class Grid:
                     self.squares[y + i][x + i] = '-selected'
                     success = True
                 elif (self.squares[y + i][x + i][0] == 'b' and self.team == 0) or (
-                                self.squares[y + i][x + i][0] == 'w' and self.team == 1):
+                        self.squares[y + i][x + i][0] == 'w' and self.team == 1):
                     self.squares[y + i][x + i] = 's' + self.squares[y + i][x + i]
                     success = True
                     break
@@ -144,7 +123,7 @@ class Grid:
                 self.squares[y][xpos] = '-selected'
                 success = True
             elif (self.squares[y][xpos][0] == 'b' and self.team == 0) or (
-                            self.squares[y][xpos][0] == 'w' and self.team == 1):
+                    self.squares[y][xpos][0] == 'w' and self.team == 1):
                 self.squares[y][xpos] = 's' + self.squares[y][xpos]
                 success = True
                 break
@@ -155,7 +134,7 @@ class Grid:
                 self.squares[y][xpos] = '-selected'
                 success = True
             elif (self.squares[y][xpos][0] == 'b' and self.team == 0) or (
-                            self.squares[y][xpos][0] == 'w' and self.team == 1):
+                    self.squares[y][xpos][0] == 'w' and self.team == 1):
                 self.squares[y][xpos] = 's' + self.squares[y][xpos]
                 success = True
                 break
@@ -170,7 +149,7 @@ class Grid:
                 self.squares[ypos][x] = '-selected'
                 success = True
             elif (self.squares[ypos][x][0] == 'b' and self.team == 0) or (
-                            self.squares[ypos][x][0] == 'w' and self.team == 1):
+                    self.squares[ypos][x][0] == 'w' and self.team == 1):
                 self.squares[ypos][x] = 's' + self.squares[ypos][x]
                 success = True
                 break
@@ -181,7 +160,7 @@ class Grid:
                 self.squares[ypos][x] = '-selected'
                 success = True
             elif (self.squares[ypos][x][0] == 'b' and self.team == 0) or (
-                            self.squares[ypos][x][0] == 'w' and self.team == 1):
+                    self.squares[ypos][x][0] == 'w' and self.team == 1):
                 self.squares[ypos][x] = 's' + self.squares[ypos][x]
                 success = True
                 break
@@ -201,12 +180,33 @@ class Grid:
         ''''Makes a move only if the new location is selected.'''
         if self.squares[newy][newx] is not None:
             if (self.squares[newy][newx] == '-selected' and self.squares[oldy][oldx] != '-selected') or \
-                            self.squares[newy][newx][0] == 's':
+                    self.squares[newy][newx][0] == 's':
                 self.squares[newy][newx] = self.squares[oldy][oldx]
                 self.deselect()
                 self.squares[oldy][oldx] = None
                 return True
         return False
+
+    @staticmethod
+    def get_sprite(piece):
+        ''''Getting image of specific piece to blit onto screen.'''
+        sel = False
+        if piece[0] == 'b':
+            color = 'black'
+            piece = piece[1:]
+        elif piece[0] == 'w':
+            color = 'white'
+            piece = piece[1:]
+        elif piece[0] == 's':
+            color = 'black' if piece[1] == 'b' else 'white'
+            piece = piece[2:]
+            sel = True
+        elif piece[0] == '-':
+            color = 'black'  # color of selection indicator doesnt matter.
+            piece = piece[1:]
+        img = pygame.image.load(f'pieces/{color}/{piece}.png')
+        width, height = img.get_rect().size
+        return img, width, height, sel
 
     def draw_board(self, gameDisplay, display_width, display_height):
         ''''Draw the pieces onto the board based on the state of the squares.'''
@@ -219,10 +219,10 @@ class Grid:
             for x in range(0, display_width, block_size):
                 piece = self.squares[yc][xc]
                 if piece:
-                    piece_img, width, height, sel = get_sprite(piece)
+                    piece_img, width, height, sel = self.get_sprite(piece)
                     gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
                     if sel:
-                        piece_img, width, height, sel = get_sprite('-selected')
+                        piece_img, width, height, sel = self.get_sprite('-selected')
                         gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
                 xc += 1
             yc += 1
