@@ -56,27 +56,28 @@ class grid:
 
     def show_moves(self, x, y):
         piece = self.squares[y][x][1:]
-        move = False
         if piece == 'pawn':
+            succes = False
             first_move = True if y == 6 else False  # Check if pawn on original position.
             # Check if positions are free, if so mark as valid moves.
             if self.squares[y - 1][x] is None:
                 self.squares[y - 1][x] = '-selected'
                 if first_move and self.squares[y - 2][x] is None:  # Get extra move.
                     self.squares[y - 2][x] = '-selected'
-                return True
-            ## Check for none first
-            if x - 1 >= 0 and y - 1 >= 0:
-                if (self.squares[y - 1][x - 1][0] == 'w' and team == 1) or (
-                                self.squares[y - 1][x - 1][0] == 'b' and team == 0):
-                    self.squares[y - 1][x - 1] = 's' + self.squares[y - 1][x - 1]
-                    move = True
-            if x + 1 < 8 and y - 1 >= 0:
-                if (self.squares[y - 1][x + 1][0] == 'w' and team == 1) or (
-                                self.squares[y - 1][x + 1][0] == 'b' and team == 0):
-                    self.squares[y - 1][x + 1] = 's' + self.squares[y - 1][x + 1]
-                    move = True
-            return move
+                succes = True
+            if self.squares[y - 1][x - 1] is not None:
+                if x - 1 >= 0 and y - 1 >= 0:
+                    if (self.squares[y - 1][x - 1][0] == 'w' and team == 1) or (
+                                    self.squares[y - 1][x - 1][0] == 'b' and team == 0):
+                        self.squares[y - 1][x - 1] = 's' + self.squares[y - 1][x - 1]
+                        succes = True
+            if self.squares[y - 1][x + 1] is not None:
+                if x + 1 < 8 and y - 1 >= 0:
+                    if (self.squares[y - 1][x + 1][0] == 'w' and team == 1) or (
+                                    self.squares[y - 1][x + 1][0] == 'b' and team == 0):
+                        self.squares[y - 1][x + 1] = 's' + self.squares[y - 1][x + 1]
+                        succes = True
+            return succes
         elif piece == 'rook':
             ver, hor = self.vert_check(x, y), self.hor_check(x, y)
             if ver or hor:
@@ -386,11 +387,11 @@ if __name__ == '__main__':
                     if game_grid.move(oldx, oldy, newx, newy):
                         selected = False
                         turn = False
-                        game_grid.squares = [i for i in reversed(game_grid.squares)]
+                        game_grid.squares = [[k for k in reversed(i)] for i in reversed(game_grid.squares)]
                         data = pickle.dumps(game_grid)
                         comms.send(data, conn, bytes=True)
                         # Reverse it back for display on own screen next iteration.
-                        game_grid.squares = [i for i in reversed(game_grid.squares)]
+                        game_grid.squares = [[k for k in reversed(i)] for i in reversed(game_grid.squares)]
                 elif event.type == pygame.MOUSEBUTTONDOWN and selected and event.button == 3:
                     game_grid.deselect()
                     selected = False
