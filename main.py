@@ -184,6 +184,7 @@ if __name__ == '__main__':
             # When it's not our turn, wait until we receive the state of the board:
             elif gamestate == 'playing' and not turn:
                 game_grid = pickle.loads(comms.listen(conn, bytes=True))
+                game_grid.team = team
                 turn = True
             # Process clicks in the main menu:
             elif gamestate == 'waiting':

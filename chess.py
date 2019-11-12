@@ -53,68 +53,162 @@ class Grid:
             ver, hor = self.vert_check(x, y), self.hor_check(x, y)
             if ver or hor:
                 return True
-            else:
-                return False
+            return False
 
         elif piece == 'bishop':
+            return self.bishop_check(x, y)
+
+        elif piece == 'knight':
             success = False
-            # Forward left:
-            for i in range(1, 8):
-                if x - i < 0 or y - i < 0:
-                    break
-                if self.squares[y - i][x - i] is None:
-                    self.squares[y - i][x - i] = '-selected'
-                    success = True
-                elif (self.squares[y - i][x - i][0] == 'b' and self.team == 0) or (
-                        self.squares[y - i][x - i][0] == 'w' and self.team == 1):
-                    self.squares[y - i][x - i] = 's' + self.squares[y - i][x - i]
-                    success = True
-                    break
-                else:
-                    break
-            # Forward right:
-            for i in range(1, 8):
-                if x + i > 7 or y - i < 0:
-                    break
-                if self.squares[y - i][x + i] is None:
-                    self.squares[y - i][x + i] = '-selected'
-                    success = True
-                elif (self.squares[y - i][x + i][0] == 'b' and self.team == 0) or (
-                        self.squares[y - i][x + i][0] == 'w' and self.team == 1):
-                    self.squares[y - i][x + i] = 's' + self.squares[y - i][x + i]
-                    success = True
-                    break
-                else:
-                    break
-            # Backward left:
-            for i in range(1, 8):
-                if x - i < 0 or y + i > 7:
-                    break
-                if self.squares[y + i][x - i] is None:
-                    self.squares[y + i][x - i] = '-selected'
-                    success = True
-                elif (self.squares[y + i][x - i][0] == 'b' and self.team == 0) or (
-                        self.squares[y + i][x - i][0] == 'w' and self.team == 1):
-                    self.squares[y + i][x - i] = 's' + self.squares[y + i][x - i]
-                    success = True
-                    break
-                else:
-                    break
-            # Backward right:
-            for i in range(1, 8):
-                if x + i > 7 or y + i > 7:
-                    break
-                if self.squares[y + i][x + i] is None:
-                    self.squares[y + i][x + i] = '-selected'
-                    success = True
-                elif (self.squares[y + i][x + i][0] == 'b' and self.team == 0) or (
-                        self.squares[y + i][x + i][0] == 'w' and self.team == 1):
-                    self.squares[y + i][x + i] = 's' + self.squares[y + i][x + i]
-                    success = True
-                    break
-                else:
-                    break
-            return success  # True if a valid move could be found for this piece, otherwise false.
+            if y - 2 >= 0:
+                if x + 1 <= 7:
+                    if self.squares[y - 2][x + 1] is None:
+                        self.squares[y - 2][x + 1] = '-selected'
+                        success = True
+                    elif (self.squares[y - 2][x + 1][0] == 'b' and self.team == 0) or (
+                            self.squares[y - 2][x + 1][0] == 'w' and self.team == 1):
+                        self.squares[y - 2][x + 1] = 's' + self.squares[y - 2][x + 1]
+                        success = True
+                if x - 1 >= 0:
+                    if self.squares[y - 2][x - 1] is None:
+                        self.squares[y - 2][x - 1] = '-selected'
+                        success = True
+                    elif (self.squares[y - 2][x - 1][0] == 'b' and self.team == 0) or (
+                            self.squares[y - 2][x - 1][0] == 'w' and self.team == 1):
+                        self.squares[y - 2][x - 1] = 's' + self.squares[y - 2][x - 1]
+                        success = True
+            if y + 2 <= 7:
+                if x + 1 <= 7:
+                    if self.squares[y + 2][x + 1] is None:
+                        self.squares[y + 2][x + 1] = '-selected'
+                        success = True
+                    elif (self.squares[y + 2][x + 1][0] == 'b' and self.team == 0) or (
+                            self.squares[y + 2][x + 1][0] == 'w' and self.team == 1):
+                        self.squares[y + 2][x + 1] = 's' + self.squares[y + 2][x + 1]
+                        success = True
+                if x - 1 >= 0:
+                    if self.squares[y + 2][x - 1] is None:
+                        self.squares[y + 2][x - 1] = '-selected'
+                        success = True
+                    elif (self.squares[y + 2][x - 1][0] == 'b' and self.team == 0) or (
+                            self.squares[y + 2][x - 1][0] == 'w' and self.team == 1):
+                        self.squares[y + 2][x - 1] = 's' + self.squares[y + 2][x - 1]
+                        success = True
+            if x + 2 <= 7:
+                if y - 1 >= 0:
+                    if self.squares[y - 1][x + 2] is None:
+                        self.squares[y - 1][x + 2] = '-selected'
+                        success = True
+                    elif (self.squares[y - 1][x + 2][0] == 'b' and self.team == 0) or (
+                            self.squares[y - 1][x + 2][0] == 'w' and self.team == 1):
+                        self.squares[y - 1][x + 2] = 's' + self.squares[y - 1][x + 2]
+                        success = True
+                if y + 1 <= 7:
+                    if self.squares[y + 1][x + 2] is None:
+                        self.squares[y + 1][x + 2] = '-selected'
+                        success = True
+                    elif (self.squares[y + 1][x + 2][0] == 'b' and self.team == 0) or (
+                            self.squares[y + 1][x + 2][0] == 'w' and self.team == 1):
+                        self.squares[y + 1][x + 2] = 's' + self.squares[y + 1][x + 2]
+                        success = True
+            if x - 2 >= 0:
+                if y - 1 >= 0:
+                    if self.squares[y - 1][x - 2] is None:
+                        self.squares[y - 1][x - 2] = '-selected'
+                        success = True
+                    elif (self.squares[y - 1][x - 2][0] == 'b' and self.team == 0) or (
+                            self.squares[y - 1][x - 2][0] == 'w' and self.team == 1):
+                        self.squares[y - 1][x - 2] = 's' + self.squares[y - 1][x - 2]
+                        success = True
+                if y + 1 <= 7:
+                    if self.squares[y + 1][x - 2] is None:
+                        self.squares[y + 1][x - 2] = '-selected'
+                        success = True
+                    elif (self.squares[y + 1][x - 2][0] == 'b' and self.team == 0) or (
+                            self.squares[y + 1][x - 2][0] == 'w' and self.team == 1):
+                        self.squares[y + 1][x - 2] = 's' + self.squares[y + 1][x - 2]
+                        success = True
+            return success
+
+        elif piece == 'queen':
+            ver, hor, bish = self.vert_check(x, y), self.hor_check(x, y), self.bishop_check(x, y)
+            if ver or hor or bish:
+                return True
+            return False
+
+        elif piece == 'king':
+            success = False
+            for yi in [1, -1, 0]:
+                for xi in [1, -1, 0]:
+                    if y + yi >= 0 and y + yi <= 7 and x + xi >= 0 and x + xi <= 7:
+                        if self.squares[y + yi][x + xi] is None:
+                            self.squares[y + yi][x + xi] = '-selected'
+                            success = True
+                        elif (self.squares[y + yi][x + xi][0] == 'b' and self.team == 0) or (
+                                self.squares[y + yi][x + xi][0] == 'w' and self.team == 1):
+                            self.squares[y + yi][x + xi] = 's' + self.squares[y + yi][x + xi]
+                            success = True
+            return success
+
+    def bishop_check(self, x, y):
+        success = False
+        # Forward left:
+        for i in range(1, 8):
+            if x - i < 0 or y - i < 0:
+                break
+            if self.squares[y - i][x - i] is None:
+                self.squares[y - i][x - i] = '-selected'
+                success = True
+            elif (self.squares[y - i][x - i][0] == 'b' and self.team == 0) or (
+                    self.squares[y - i][x - i][0] == 'w' and self.team == 1):
+                self.squares[y - i][x - i] = 's' + self.squares[y - i][x - i]
+                success = True
+                break
+            else:
+                break
+        # Forward right:
+        for i in range(1, 8):
+            if x + i > 7 or y - i < 0:
+                break
+            if self.squares[y - i][x + i] is None:
+                self.squares[y - i][x + i] = '-selected'
+                success = True
+            elif (self.squares[y - i][x + i][0] == 'b' and self.team == 0) or (
+                    self.squares[y - i][x + i][0] == 'w' and self.team == 1):
+                self.squares[y - i][x + i] = 's' + self.squares[y - i][x + i]
+                success = True
+                break
+            else:
+                break
+        # Backward left:
+        for i in range(1, 8):
+            if x - i < 0 or y + i > 7:
+                break
+            if self.squares[y + i][x - i] is None:
+                self.squares[y + i][x - i] = '-selected'
+                success = True
+            elif (self.squares[y + i][x - i][0] == 'b' and self.team == 0) or (
+                    self.squares[y + i][x - i][0] == 'w' and self.team == 1):
+                self.squares[y + i][x - i] = 's' + self.squares[y + i][x - i]
+                success = True
+                break
+            else:
+                break
+        # Backward right:
+        for i in range(1, 8):
+            if x + i > 7 or y + i > 7:
+                break
+            if self.squares[y + i][x + i] is None:
+                self.squares[y + i][x + i] = '-selected'
+                success = True
+            elif (self.squares[y + i][x + i][0] == 'b' and self.team == 0) or (
+                    self.squares[y + i][x + i][0] == 'w' and self.team == 1):
+                self.squares[y + i][x + i] = 's' + self.squares[y + i][x + i]
+                success = True
+                break
+            else:
+                break
+        return success  # True if a valid move could be found for this piece, otherwise false.
 
     def hor_check(self, x, y):
         success = False
