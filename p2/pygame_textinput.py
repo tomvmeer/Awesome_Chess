@@ -178,6 +178,9 @@ class TextInput:
         self.input_string = ""
         self.cursor_position = 0
 
+    def set_text(self, text):
+        self.input_string = text
+
 
 
 if __name__ == "__main__":

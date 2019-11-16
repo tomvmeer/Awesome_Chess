@@ -16,10 +16,10 @@ class Grid:
             self.squares[i][-2] = c + 'knight'
             self.squares[i][2] = c + 'bishop'
             self.squares[i][-3] = c + 'bishop'
-        self.squares[0][3] = 'bqueen' if team == 0 else 'wqueen'
-        self.squares[0][-4] = 'bking' if team == 0 else 'wking'
-        self.squares[-1][-4] = 'wqueen' if team == 0 else 'bqueen'
-        self.squares[-1][3] = 'wking' if team == 0 else 'bking'
+        self.squares[0][3] = 'bqueen' if team == 0 else 'wking'
+        self.squares[0][-4] = 'bking' if team == 0 else 'wqueen'
+        self.squares[-1][3] = 'wqueen' if team == 0 else 'bking'
+        self.squares[-1][-4] = 'wking' if team == 0 else 'bqueen'
 
     def show_moves(self, x, y):
         piece = self.squares[y][x][1:]
@@ -37,14 +37,14 @@ class Grid:
             if self.squares[y - 1][x - 1] is not None:
                 if x - 1 >= 0 and y - 1 >= 0:
                     if (self.squares[y - 1][x - 1][0] == 'w' and self.team == 1) or (
-                            self.squares[y - 1][x - 1][0] == 'b' and self.team == 0):
+                                    self.squares[y - 1][x - 1][0] == 'b' and self.team == 0):
                         self.squares[y - 1][x - 1] = 's' + self.squares[y - 1][x - 1]
                         success = True
             # Check front right:
             if self.squares[y - 1][x + 1] is not None:
                 if x + 1 < 8 and y - 1 >= 0:
                     if (self.squares[y - 1][x + 1][0] == 'w' and self.team == 1) or (
-                            self.squares[y - 1][x + 1][0] == 'b' and self.team == 0):
+                                    self.squares[y - 1][x + 1][0] == 'b' and self.team == 0):
                         self.squares[y - 1][x + 1] = 's' + self.squares[y - 1][x + 1]
                         success = True
             return success  # True if a valid move could be found for this piece, otherwise false.
@@ -66,7 +66,7 @@ class Grid:
                         self.squares[y - 2][x + 1] = '-selected'
                         success = True
                     elif (self.squares[y - 2][x + 1][0] == 'b' and self.team == 0) or (
-                            self.squares[y - 2][x + 1][0] == 'w' and self.team == 1):
+                                    self.squares[y - 2][x + 1][0] == 'w' and self.team == 1):
                         self.squares[y - 2][x + 1] = 's' + self.squares[y - 2][x + 1]
                         success = True
                 if x - 1 >= 0:
@@ -74,7 +74,7 @@ class Grid:
                         self.squares[y - 2][x - 1] = '-selected'
                         success = True
                     elif (self.squares[y - 2][x - 1][0] == 'b' and self.team == 0) or (
-                            self.squares[y - 2][x - 1][0] == 'w' and self.team == 1):
+                                    self.squares[y - 2][x - 1][0] == 'w' and self.team == 1):
                         self.squares[y - 2][x - 1] = 's' + self.squares[y - 2][x - 1]
                         success = True
             if y + 2 <= 7:
@@ -83,7 +83,7 @@ class Grid:
                         self.squares[y + 2][x + 1] = '-selected'
                         success = True
                     elif (self.squares[y + 2][x + 1][0] == 'b' and self.team == 0) or (
-                            self.squares[y + 2][x + 1][0] == 'w' and self.team == 1):
+                                    self.squares[y + 2][x + 1][0] == 'w' and self.team == 1):
                         self.squares[y + 2][x + 1] = 's' + self.squares[y + 2][x + 1]
                         success = True
                 if x - 1 >= 0:
@@ -91,7 +91,7 @@ class Grid:
                         self.squares[y + 2][x - 1] = '-selected'
                         success = True
                     elif (self.squares[y + 2][x - 1][0] == 'b' and self.team == 0) or (
-                            self.squares[y + 2][x - 1][0] == 'w' and self.team == 1):
+                                    self.squares[y + 2][x - 1][0] == 'w' and self.team == 1):
                         self.squares[y + 2][x - 1] = 's' + self.squares[y + 2][x - 1]
                         success = True
             if x + 2 <= 7:
@@ -100,7 +100,7 @@ class Grid:
                         self.squares[y - 1][x + 2] = '-selected'
                         success = True
                     elif (self.squares[y - 1][x + 2][0] == 'b' and self.team == 0) or (
-                            self.squares[y - 1][x + 2][0] == 'w' and self.team == 1):
+                                    self.squares[y - 1][x + 2][0] == 'w' and self.team == 1):
                         self.squares[y - 1][x + 2] = 's' + self.squares[y - 1][x + 2]
                         success = True
                 if y + 1 <= 7:
@@ -108,7 +108,7 @@ class Grid:
                         self.squares[y + 1][x + 2] = '-selected'
                         success = True
                     elif (self.squares[y + 1][x + 2][0] == 'b' and self.team == 0) or (
-                            self.squares[y + 1][x + 2][0] == 'w' and self.team == 1):
+                                    self.squares[y + 1][x + 2][0] == 'w' and self.team == 1):
                         self.squares[y + 1][x + 2] = 's' + self.squares[y + 1][x + 2]
                         success = True
             if x - 2 >= 0:
@@ -117,7 +117,7 @@ class Grid:
                         self.squares[y - 1][x - 2] = '-selected'
                         success = True
                     elif (self.squares[y - 1][x - 2][0] == 'b' and self.team == 0) or (
-                            self.squares[y - 1][x - 2][0] == 'w' and self.team == 1):
+                                    self.squares[y - 1][x - 2][0] == 'w' and self.team == 1):
                         self.squares[y - 1][x - 2] = 's' + self.squares[y - 1][x - 2]
                         success = True
                 if y + 1 <= 7:
@@ -125,7 +125,7 @@ class Grid:
                         self.squares[y + 1][x - 2] = '-selected'
                         success = True
                     elif (self.squares[y + 1][x - 2][0] == 'b' and self.team == 0) or (
-                            self.squares[y + 1][x - 2][0] == 'w' and self.team == 1):
+                                    self.squares[y + 1][x - 2][0] == 'w' and self.team == 1):
                         self.squares[y + 1][x - 2] = 's' + self.squares[y + 1][x - 2]
                         success = True
             return success
@@ -145,7 +145,7 @@ class Grid:
                             self.squares[y + yi][x + xi] = '-selected'
                             success = True
                         elif (self.squares[y + yi][x + xi][0] == 'b' and self.team == 0) or (
-                                self.squares[y + yi][x + xi][0] == 'w' and self.team == 1):
+                                        self.squares[y + yi][x + xi][0] == 'w' and self.team == 1):
                             self.squares[y + yi][x + xi] = 's' + self.squares[y + yi][x + xi]
                             success = True
             return success
@@ -160,7 +160,7 @@ class Grid:
                 self.squares[y - i][x - i] = '-selected'
                 success = True
             elif (self.squares[y - i][x - i][0] == 'b' and self.team == 0) or (
-                    self.squares[y - i][x - i][0] == 'w' and self.team == 1):
+                            self.squares[y - i][x - i][0] == 'w' and self.team == 1):
                 self.squares[y - i][x - i] = 's' + self.squares[y - i][x - i]
                 success = True
                 break
@@ -174,7 +174,7 @@ class Grid:
                 self.squares[y - i][x + i] = '-selected'
                 success = True
             elif (self.squares[y - i][x + i][0] == 'b' and self.team == 0) or (
-                    self.squares[y - i][x + i][0] == 'w' and self.team == 1):
+                            self.squares[y - i][x + i][0] == 'w' and self.team == 1):
                 self.squares[y - i][x + i] = 's' + self.squares[y - i][x + i]
                 success = True
                 break
@@ -188,7 +188,7 @@ class Grid:
                 self.squares[y + i][x - i] = '-selected'
                 success = True
             elif (self.squares[y + i][x - i][0] == 'b' and self.team == 0) or (
-                    self.squares[y + i][x - i][0] == 'w' and self.team == 1):
+                            self.squares[y + i][x - i][0] == 'w' and self.team == 1):
                 self.squares[y + i][x - i] = 's' + self.squares[y + i][x - i]
                 success = True
                 break
@@ -202,7 +202,7 @@ class Grid:
                 self.squares[y + i][x + i] = '-selected'
                 success = True
             elif (self.squares[y + i][x + i][0] == 'b' and self.team == 0) or (
-                    self.squares[y + i][x + i][0] == 'w' and self.team == 1):
+                            self.squares[y + i][x + i][0] == 'w' and self.team == 1):
                 self.squares[y + i][x + i] = 's' + self.squares[y + i][x + i]
                 success = True
                 break
@@ -217,7 +217,7 @@ class Grid:
                 self.squares[y][xpos] = '-selected'
                 success = True
             elif (self.squares[y][xpos][0] == 'b' and self.team == 0) or (
-                    self.squares[y][xpos][0] == 'w' and self.team == 1):
+                            self.squares[y][xpos][0] == 'w' and self.team == 1):
                 self.squares[y][xpos] = 's' + self.squares[y][xpos]
                 success = True
                 break
@@ -228,7 +228,7 @@ class Grid:
                 self.squares[y][xpos] = '-selected'
                 success = True
             elif (self.squares[y][xpos][0] == 'b' and self.team == 0) or (
-                    self.squares[y][xpos][0] == 'w' and self.team == 1):
+                            self.squares[y][xpos][0] == 'w' and self.team == 1):
                 self.squares[y][xpos] = 's' + self.squares[y][xpos]
                 success = True
                 break
@@ -243,7 +243,7 @@ class Grid:
                 self.squares[ypos][x] = '-selected'
                 success = True
             elif (self.squares[ypos][x][0] == 'b' and self.team == 0) or (
-                    self.squares[ypos][x][0] == 'w' and self.team == 1):
+                            self.squares[ypos][x][0] == 'w' and self.team == 1):
                 self.squares[ypos][x] = 's' + self.squares[ypos][x]
                 success = True
                 break
@@ -254,7 +254,7 @@ class Grid:
                 self.squares[ypos][x] = '-selected'
                 success = True
             elif (self.squares[ypos][x][0] == 'b' and self.team == 0) or (
-                    self.squares[ypos][x][0] == 'w' and self.team == 1):
+                            self.squares[ypos][x][0] == 'w' and self.team == 1):
                 self.squares[ypos][x] = 's' + self.squares[ypos][x]
                 success = True
                 break
@@ -274,7 +274,7 @@ class Grid:
         ''''Makes a move only if the new location is selected.'''
         if self.squares[newy][newx] is not None:
             if (self.squares[newy][newx] == '-selected' and self.squares[oldy][oldx] != '-selected') or \
-                    self.squares[newy][newx][0] == 's':
+                            self.squares[newy][newx][0] == 's':
                 self.squares[newy][newx] = self.squares[oldy][oldx]
                 self.deselect()
                 self.squares[oldy][oldx] = None

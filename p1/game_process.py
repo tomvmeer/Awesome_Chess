@@ -12,112 +12,6 @@ gray = (169, 169, 169)
 white = (255, 255, 255)
 
 
-# # if __name__ == '__main__':
-# pygame.init()
-# HOST = None
-# PORT = 65432
-# clock = pygame.time.Clock()
-# crashed = False
-# conn = None
-# turn = False
-# gamestate = 'waiting'
-# playername = None
-# opponent = None
-# team = None
-# textinput = pygame_textinput.TextInput()
-# selected = False
-# display_width = 800
-# display_height = 800
-#
-# gameDisplay = pygame.display.set_mode((display_width, display_height))
-# pygame.display.set_caption('Awesome Chess')
-# while not crashed:
-#     # Handling events:
-#     events = pygame.event.get()
-#     for event in events:
-#         if event.type == pygame.QUIT:
-#             crashed = True
-#         if gamestate == 'playing' and turn:
-#             # Handling a click on a square to then show available moves:
-#             if event.type == pygame.MOUSEBUTTONDOWN and not selected and event.button == 1:
-#                 x, y = event.pos
-#                 oldx, oldy = x // 100, y // 100
-#                 if game_grid.squares[oldy][oldx]:
-#                     if ('w' == game_grid.squares[oldy][oldx][0] and team == 0) or (
-#                                     'b' == game_grid.squares[oldy][oldx][0] and team == 1):
-#                         if game_grid.show_moves(oldx, oldy):
-#                             selected = True
-#             # Handling a click on a square to move a piece:
-#             elif event.type == pygame.MOUSEBUTTONDOWN and selected and event.button == 1:
-#                 x, y = event.pos
-#                 newx, newy = x // 100, y // 100
-#                 if game_grid.move(oldx, oldy, newx, newy):
-#                     selected = False
-#                     turn = False
-#
-#                     # Turn is over after a move, sending the state of the board to the opponent.
-#                     game_grid.squares = [[k for k in reversed(i)] for i in reversed(game_grid.squares)]
-#                     data = pickle.dumps(game_grid)
-#                     comms.send(data, conn, bytes=True)
-#                     # Reverse it back for display on own screen next iteration.
-#                     game_grid.squares = [[k for k in reversed(i)] for i in reversed(game_grid.squares)]
-#             # Handling a left click on a square to deselect.
-#             elif event.type == pygame.MOUSEBUTTONDOWN and selected and event.button == 3:
-#                 game_grid.deselect()
-#                 selected = False
-#         # When it's not our turn, wait until we receive the state of the board:
-#         elif gamestate == 'playing' and not turn:
-#             game_grid = pickle.loads(comms.listen(conn, bytes=True))
-#             game_grid.team = team
-#             turn = True
-#         # Process clicks in the main menu:
-#         elif gamestate == 'waiting':
-#             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 x, y = event.pos
-#                 if (x >= 50 and x <= 300) and (y >= 50 and y <= 100):
-#                     gamestate = 'joining'
-#                 elif (x >= 50 and x <= 300) and (y >= 125 and y <= 175):
-#                     gamestate = 'host_waiting'
-#         elif gamestate == 'host_waiting':
-#             pass
-#         elif gamestate == 'joining':
-#             pass
-#
-#     if pygame.display.get_active():  # When the application window is open.
-#         # Drawing the screens:
-#         if gamestate == 'playing':
-#             game_grid.draw_board(gameDisplay, display_width, display_height)
-#         elif gamestate == 'waiting':
-#             draw_wait()
-#         elif gamestate == 'host_waiting':
-#             if draw_hosting(events):  # When the hosting menu is successfully navigated.
-#                 # team = random.randint(0, 1)
-#                 team = 0
-#                 time.sleep(2)
-#                 comms.send('1' if team == 0 else '0', conn)
-#                 game_grid = chess.Grid(team)
-#                 gamestate = 'playing'
-#                 if team == 0:
-#                     turn = True
-#                 else:
-#                     game_grid.draw_board(gameDisplay, display_width, display_height)
-#         elif gamestate == 'joining':
-#             if draw_join(events):  # When the joining menu is successfully navigated.
-#                 game_grid = chess.Grid(team)
-#                 time.sleep(2)
-#                 gamestate = 'playing'
-#                 if team == 0:
-#                     turn = True
-#                 else:
-#                     game_grid.draw_board(gameDisplay, display_width, display_height)
-#
-#         pygame.display.update()
-#         clock.tick(30)
-#
-# pygame.quit()
-# quit()
-
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -133,6 +27,10 @@ class Game:
         if event.type == pygame.QUIT:
             print('> Game is now exiting')
             self.crashed = True
+            data = {
+                'state': 'quitting'
+            }
+            self.inform_network_process(data)
 
     def draw_button(self, ypos, xpos, width, height, text):
         edge = pygame.Rect(xpos, ypos, width, height)
@@ -245,6 +143,12 @@ class Joining(Game):
             if data['state'] == 'connected':
                 self.opponent_name = data['opponent_name']
                 self.state += 1
+                self.t = 0
+        if self.state == 4:
+            self.t += 1
+            if self.t == 200:
+                print('> Returning playing')
+                return Playing()
         # Other event handling:
         for event in events:
             self.handle_quit(event)
@@ -318,6 +222,11 @@ class Hosting(Game):
             if data['state'] == 'connected':
                 self.opponent_name = data['opponent_name']
                 self.state += 1
+                self.t = 0
+        if self.state == 3:
+            self.t += 1
+            if self.t == 200:
+                return Playing()
         # Other event handling:
         for event in events:
             self.handle_quit(event)
@@ -364,19 +273,18 @@ class Playing(Game):
         self.selected = False
         data['board'] = [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)]
         self.inform_network_process(data)
+        self.display.fill(white)
+        print('...')
 
     def draw(self):
         self.game_grid.draw_board(self.display, self.display_width, self.display_height)
 
     def handle_events(self):
         events = pygame.event.get()
-        # Handling network driven events:
-        data = self.get_status_from_network_process()
-        self.turn = data['is_turn']
         # Other event handling:
         for event in events:
             self.handle_quit(event)
-            if self.turn:
+            if self.turn is True:
                 # Handling a click on a square to then show available moves:
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.selected and event.button == 1:
                     x, y = event.pos
@@ -393,8 +301,9 @@ class Playing(Game):
                     if self.game_grid.move(self.oldx, self.oldy, newx, newy):
                         self.selected = False
                         self.turn = False
+                        print('> Turn is over')
                         data = {
-                            'is_turn': self.turn,
+                            'is_turn': 'done',
                             'team': self.team,
                             'player_name': self.player_name,
                             'opponent_name': self.opponent_name,
@@ -406,11 +315,13 @@ class Playing(Game):
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.selected and event.button == 3:
                     self.game_grid.deselect()
                     self.selected = False
-            else:
-                data = self.get_status_from_network_process()
-                if data['is_turn']:
-                    self.turn = True
-                    self.game_grid = data['board']
+        # Handling network driven events:
+        if not self.turn:
+            data = self.get_status_from_network_process()
+            if data['is_turn'] is True:
+                print('> Update:', data)
+                self.turn = True
+                self.game_grid.squares = data['board']
 
 
 game = Waiting()
@@ -419,5 +330,6 @@ while not game.crashed:
     pygame.display.update()
     changed_state = game.handle_events()
     if changed_state is not None:
+        print(changed_state)
         game = changed_state
     game.clock.tick(30)
