@@ -6,10 +6,13 @@ import random
 import chess
 import time
 import pickle
+import os
 
 black = (0, 0, 0)
 gray = (169, 169, 169)
 white = (255, 255, 255)
+path = 'C:\\Users\\20173939\\Google Drive\\PycharmProjects\\Awesome_Chess\\'
+i = [i for i in range(2) if f'data_{i}.dat' not in os.listdir(path)][0]
 
 
 class Game:
@@ -31,6 +34,8 @@ class Game:
                 'state': 'quitting'
             }
             self.inform_network_process(data)
+            return True
+        return False
 
     def draw_button(self, ypos, xpos, width, height, text):
         edge = pygame.Rect(xpos, ypos, width, height)
@@ -47,13 +52,23 @@ class Game:
 
     @staticmethod
     def inform_network_process(data):
-        with open('status.dat', 'wb') as f:
-            f.write(pickle.dumps(data))
+        while True:
+            try:
+                with open(f'data_{i}.dat', 'wb') as f:
+                    f.write(pickle.dumps(data))
+            except EOFError:
+                pass
+            else:
+                break
 
     @staticmethod
     def get_status_from_network_process():
-        with open('status.dat', 'rb') as f:
-            return pickle.loads(f.read())
+        while True:
+            try:
+                with open(f'data_{i}.dat', 'rb') as f:
+                    return pickle.loads(f.read())
+            except EOFError:
+                pass
 
 
 class Joining(Game):
@@ -274,7 +289,7 @@ class Playing(Game):
         data['board'] = [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)]
         self.inform_network_process(data)
         self.display.fill(white)
-        print('...')
+        pygame.display.set_caption('Awesome Chess, player: ' + self.player_name)
 
     def draw(self):
         self.game_grid.draw_board(self.display, self.display_width, self.display_height)
@@ -283,7 +298,8 @@ class Playing(Game):
         events = pygame.event.get()
         # Other event handling:
         for event in events:
-            self.handle_quit(event)
+            if self.handle_quit(event):
+                return
             if self.turn is True:
                 # Handling a click on a square to then show available moves:
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.selected and event.button == 1:

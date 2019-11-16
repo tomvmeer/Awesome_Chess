@@ -1,17 +1,31 @@
 import socket_comms
 import pickle
+import os
 import time
 
 
 def inform_game_process(data):
-    with open('status.dat', 'wb') as f:
+    global filename
+    with open(filename, 'wb') as f:
         f.write(pickle.dumps(data))
 
 
 def get_status_from_game_process():
-    with open('status.dat', 'rb') as f:
+    global filename
+    with open(filename, 'rb') as f:
         return pickle.loads(f.read())
 
+
+dir = 'C:\\Users\\20173939\\Google Drive\\PycharmProjects\\Awesome_Chess'
+
+while True:
+    old = os.listdir(dir)
+    time.sleep(0.01)
+    filename = [i for i in os.listdir(dir) if i not in old]
+    if len(filename) == 1:
+        break
+filename = filename[0]
+print('> Communication file:', filename)
 
 data = {
     'state': 'waiting'
@@ -51,5 +65,6 @@ while True:
             inform_game_process(data)
     elif data['state'] == 'quitting':
         print('> network is quitting')
+        os.remove(filename)
         break
     time.sleep(0.5)
