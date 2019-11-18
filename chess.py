@@ -20,6 +20,7 @@ class Grid:
         self.squares[0][-4] = 'bking' if team == 0 else 'wqueen'
         self.squares[-1][3] = 'wqueen' if team == 0 else 'bking'
         self.squares[-1][-4] = 'wking' if team == 0 else 'bqueen'
+        self.highlighted = None
 
     def show_moves(self, x, y):
         piece = self.squares[y][x][1:]
@@ -288,6 +289,7 @@ class Grid:
     def get_sprite(piece):
         ''''Getting image of specific piece to blit onto screen.'''
         sel = False
+        high = False
         if piece[0] == 'b':
             color = 'black'
             piece = piece[1:]
@@ -298,12 +300,19 @@ class Grid:
             color = 'black' if piece[1] == 'b' else 'white'
             piece = piece[2:]
             sel = True
-        elif piece[0] == '-':
+        elif piece == '-selected':
             color = 'black'  # color of selection indicator doesnt matter.
             piece = piece[1:]
+        elif piece == '-highlighted':
+            color = 'black'  # color of hover indicator doesnt matter.
+            piece = piece[1:]
+        elif piece[0] == 'h':
+            color = 'black' if piece[1] == 'b' else 'white'
+            piece = piece[2:]
+            high = True
         img = pygame.image.load(f'pieces/{color}/{piece}.png')
         width, height = img.get_rect().size
-        return img, width, height, sel
+        return img, width, height, sel, high
 
     def draw_board(self, gameDisplay, display_width, display_height):
         ''''Draw the pieces onto the board based on the state of the squares.'''
@@ -316,10 +325,42 @@ class Grid:
             for x in range(0, display_width, block_size):
                 piece = self.squares[yc][xc]
                 if piece:
-                    piece_img, width, height, sel = self.get_sprite(piece)
+                    piece_img, width, height, sel, high = self.get_sprite(piece)
                     gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
                     if sel:
-                        piece_img, width, height, sel = self.get_sprite('-selected')
+                        piece_img, width, height, sel, high = self.get_sprite('-selected')
+                        gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
+                    if high:
+                        piece_img, width, height, sel, high = self.get_sprite('-highlighted')
                         gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
                 xc += 1
             yc += 1
+
+    def highlight_moves(self, x, y):
+        # Removing old highlighted square:
+        if self.highlighted != [y, x]:
+            for ys in range(8):
+                for xs in range(8):
+                    if self.squares[xs][ys]:
+                        if self.squares[xs][ys] == '-highlighted':
+                            self.squares[xs][ys] = None
+                        elif self.squares[xs][ys][0] == 'h':
+                            self.squares[xs][ys] = self.squares[xs][ys][1:]
+            # Calculating new highlighted square:
+            opponent_team = 0 if self.team == 1 else 1
+            opponent_grid = Grid(opponent_team)
+            opponent_grid.squares = [[k for k in reversed(i)] for i in reversed(self.squares)]
+            if self.squares[y][x]:
+                if ('b' == self.squares[y][x][0] and self.team == 0) or (
+                                'w' == self.squares[y][x][0] and self.team == 1):
+                    if opponent_grid.show_moves(7 - x, 7 - y):
+                        moves = [[k for k in reversed(i)] for i in reversed(opponent_grid.squares)]
+                        for y in range(8):
+                            for x in range(8):
+                                if moves[y][x] is not None:
+                                    if moves[y][x] == '-selected':
+                                        self.squares[y][x] = '-highlighted'
+                                        self.highlighted = [y, x]
+                                    if moves[y][x][0] == 's':
+                                        self.squares[y][x] = 'h' + moves[y][x][1:]
+                                        self.highlighted = [y, x]

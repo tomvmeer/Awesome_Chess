@@ -7,6 +7,7 @@ import chess
 import time
 import pickle
 import os
+import socket
 
 black = (0, 0, 0)
 gray = (169, 169, 169)
@@ -166,7 +167,8 @@ class Joining(Game):
                 return Playing()
         # Other event handling:
         for event in events:
-            self.handle_quit(event)
+            if self.handle_quit(event):
+                return
 
 
 class Hosting(Game):
@@ -244,7 +246,8 @@ class Hosting(Game):
                 return Playing()
         # Other event handling:
         for event in events:
-            self.handle_quit(event)
+            if self.handle_quit(event):
+                return
 
 
 class Waiting(Game):
@@ -265,7 +268,8 @@ class Waiting(Game):
         events = pygame.event.get()
         # Other event handling:
         for event in events:
-            self.handle_quit(event)
+            if self.handle_quit(event):
+                return
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x, y = event.pos
                 if (x >= 50 and x <= 300) and (y >= 50 and y <= 100):
@@ -298,6 +302,10 @@ class Playing(Game):
         events = pygame.event.get()
         # Other event handling:
         for event in events:
+            if event.type == pygame.MOUSEMOTION:
+                x, y = event.pos
+                x, y = x // 100, y // 100
+                self.game_grid.highlight_moves(x,y)
             if self.handle_quit(event):
                 return
             if self.turn is True:
