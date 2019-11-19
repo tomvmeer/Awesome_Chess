@@ -294,6 +294,7 @@ class Playing(Game):
         self.inform_network_process(data)
         self.display.fill(white)
         pygame.display.set_caption('Awesome Chess, player: ' + self.player_name)
+        self.highlighted = None
 
     def draw(self):
         self.game_grid.draw_board(self.display, self.display_width, self.display_height)
@@ -305,7 +306,11 @@ class Playing(Game):
             if event.type == pygame.MOUSEMOTION and not self.selected:
                 x, y = event.pos
                 x, y = x // 100, y // 100
-                self.game_grid.highlight_moves(x,y)
+                if [x, y] != self.highlighted:
+                    self.highlighted = [x, y]
+                    self.game_grid.remove_highlight()
+                    self.game_grid.highlight_moves(x, y)
+
             if self.handle_quit(event):
                 return
             if self.turn is True:
@@ -326,6 +331,7 @@ class Playing(Game):
                         self.selected = False
                         self.turn = False
                         print('> Turn is over')
+                        self.game_grid.check_check()
                         data = {
                             'is_turn': 'done',
                             'team': self.team,
@@ -346,6 +352,7 @@ class Playing(Game):
                 print('> Update:', data)
                 self.turn = True
                 self.game_grid.squares = data['board']
+                self.game_grid.check_check()
 
 
 game = Waiting()

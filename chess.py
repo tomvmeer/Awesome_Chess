@@ -21,6 +21,7 @@ class Grid:
         self.squares[-1][3] = 'wqueen' if team == 0 else 'bking'
         self.squares[-1][-4] = 'wking' if team == 0 else 'bqueen'
         self.highlighted = None
+        self.checked = None
 
     def show_moves(self, x, y):
         piece = self.squares[y][x][1:]
@@ -301,15 +302,17 @@ class Grid:
             piece = piece[2:]
             sel = True
         elif piece == '-selected':
-            color = 'black'  # color of selection indicator doesnt matter.
+            color = 'black'  # team color of selection indicator doesnt matter.
             piece = piece[1:]
         elif piece == '-highlighted':
-            color = 'black'  # color of hover indicator doesnt matter.
+            color = 'black'  # team color of hover indicator doesnt matter.
             piece = piece[1:]
         elif piece[0] == 'h':
             color = 'black' if piece[1] == 'b' else 'white'
             piece = piece[2:]
             high = True
+        elif piece == 'checked':
+            color = 'black'  # team color of check indicator doesnt matter.
         img = pygame.image.load(f'pieces/{color}/{piece}.png')
         width, height = img.get_rect().size
         return img, width, height, sel, high
@@ -333,34 +336,50 @@ class Grid:
                     if high:
                         piece_img, width, height, sel, high = self.get_sprite('-highlighted')
                         gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
+                if [yc, xc] == self.checked:
+                    piece_img, width, height, sel, high = self.get_sprite('checked')
+                    gameDisplay.blit(piece_img, (x + (block_size - width) // 2, y + (block_size - height) // 2))
                 xc += 1
             yc += 1
 
-    def highlight_moves(self, x, y):
+    def remove_highlight(self):
         # Removing old highlighted square:
-        if self.highlighted != [y, x]:
-            for ys in range(8):
-                for xs in range(8):
-                    if self.squares[xs][ys]:
-                        if self.squares[xs][ys] == '-highlighted':
-                            self.squares[xs][ys] = None
-                        elif self.squares[xs][ys][0] == 'h':
-                            self.squares[xs][ys] = self.squares[xs][ys][1:]
-            # Calculating new highlighted square:
-            opponent_team = 0 if self.team == 1 else 1
-            opponent_grid = Grid(opponent_team)
-            opponent_grid.squares = [[k for k in reversed(i)] for i in reversed(self.squares)]
-            if self.squares[y][x]:
-                if ('b' == self.squares[y][x][0] and self.team == 0) or (
-                                'w' == self.squares[y][x][0] and self.team == 1):
-                    if opponent_grid.show_moves(7 - x, 7 - y):
-                        moves = [[k for k in reversed(i)] for i in reversed(opponent_grid.squares)]
-                        for y in range(8):
-                            for x in range(8):
-                                if moves[y][x] is not None:
-                                    if moves[y][x] == '-selected':
-                                        self.squares[y][x] = '-highlighted'
-                                        self.highlighted = [y, x]
-                                    if moves[y][x][0] == 's':
-                                        self.squares[y][x] = 'h' + moves[y][x][1:]
-                                        self.highlighted = [y, x]
+        for ys in range(8):
+            for xs in range(8):
+                if self.squares[xs][ys]:
+                    if self.squares[xs][ys] == '-highlighted':
+                        self.squares[xs][ys] = None
+                    elif self.squares[xs][ys][0] == 'h':
+                        self.squares[xs][ys] = self.squares[xs][ys][1:]
+
+    def highlight_moves(self, x, y):
+        # Calculating highlighted square:
+        opponent_team = 0 if self.team == 1 else 1
+        opponent_grid = Grid(opponent_team)
+        opponent_grid.squares = [[k for k in reversed(i)] for i in reversed(self.squares)]
+        if self.squares[y][x]:
+            if ('b' == self.squares[y][x][0] and self.team == 0) or (
+                            'w' == self.squares[y][x][0] and self.team == 1):
+                if opponent_grid.show_moves(7 - x, 7 - y):
+                    moves = [[k for k in reversed(i)] for i in reversed(opponent_grid.squares)]
+                    for y in range(8):
+                        for x in range(8):
+                            if moves[y][x] is not None:
+                                if moves[y][x] == '-selected':
+                                    self.squares[y][x] = '-highlighted'
+                                    self.highlighted = [y, x]
+                                if moves[y][x][0] == 's':
+                                    self.squares[y][x] = 'h' + moves[y][x][1:]
+                                    self.highlighted = [y, x]
+
+    def check_check(self):
+        self.checked = None
+        for ys in range(8):
+            for xs in range(8):
+                self.highlight_moves(xs, ys)
+        color = 'w' if self.team == 0 else 'b'
+        for y in range(8):
+            for x in range(8):
+                if self.squares[y][x] == 'h' + color + 'king':
+                    self.checked = [y, x]
+        self.remove_highlight()
