@@ -302,7 +302,7 @@ class Playing(Game):
         events = pygame.event.get()
         # Other event handling:
         for event in events:
-            if event.type == pygame.MOUSEMOTION:
+            if event.type == pygame.MOUSEMOTION and not self.selected:
                 x, y = event.pos
                 x, y = x // 100, y // 100
                 self.game_grid.highlight_moves(x,y)
