@@ -1,9 +1,12 @@
 import os
 from multiprocessing import Pool
+import config
+
+path = config.load_config('python_path')
 
 
 def run(process):
-    os.system(f'C:/users/maren/Anaconda3/python {process}')
+    os.system(f'{path} {process}')
 
 
 if __name__ == '__main__':

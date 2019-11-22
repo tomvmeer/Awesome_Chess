@@ -27,10 +27,12 @@ def send(tosend, conn, bytes=False):
 
 def host_game(HOST, PORT):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(1)
         s.bind((HOST, PORT))
         s.listen()
         conn, addr = s.accept()
         print('Connected by', addr)
+        conn.settimeout(5)
         while listen(conn) != 'connecting':
             pass
         playername = listen(conn)
@@ -39,6 +41,7 @@ def host_game(HOST, PORT):
 
 def connect(HOST, PORT, playername):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(5)
     s.connect((HOST, PORT))
     time.sleep(1)
     send('connecting', s)

@@ -8,11 +8,12 @@ import time
 import pickle
 import os
 import socket
+import config
 
 black = (0, 0, 0)
 gray = (169, 169, 169)
 white = (255, 255, 255)
-path = 'C:/Users/maren/PycharmProjects/Awesome_Chess/'
+path = config.load_config('app_path')
 i = [i for i in range(2) if f'data_{i}.dat' not in os.listdir(path)][0]
 
 
