@@ -397,9 +397,9 @@ class Grid:
         for ys in range(8):
             for xs in range(8):
                 self.highlight_moves(xs, ys)
-        color = 'w' if self.team == 0 else 'b'
-        for y in range(8):
-            for x in range(8):
-                if self.squares[y][x] == 'h' + color + 'king':
-                    self.checked = [y, x]
-        self.remove_highlight()
+                color = 'w' if self.team == 0 else 'b'
+                for y in range(8):
+                    for x in range(8):
+                        if self.squares[y][x] == 'h' + color + 'king':
+                            self.checked = [y, x]
+                self.remove_highlight()

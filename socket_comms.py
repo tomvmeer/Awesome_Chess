@@ -2,57 +2,62 @@ import socket
 import time
 
 
-def listen(conn, bytes=False):
-    while True:
-        data = conn.recv(1024)
-        if data:
-            conn.sendall(data)
-            if bytes:
-                return data
-            return data.decode()
+class Connection:
+    def __init__(self, host, port):
+        self.conn = None
+        self.host = host
+        self.port = port
 
+    def listen(self, bytes=False):
+        try:
+            data = self.conn.recv(1024)
+            if data:
+                self.conn.sendall(data)
+                if bytes:
+                    return data
+                return data.decode()
+            return False
+        except Exception as e:
+            print(e)
+            return False
 
-def send(tosend, conn, bytes=False):
-    while True:
-        if not bytes:
-            conn.sendall(tosend.encode())
-        else:
-            conn.sendall(tosend)
-        data = conn.recv(1024)
+    def send(self, tosend, bytes=False):
+        try:
+            if not bytes:
+                self.conn.sendall(tosend.encode())
+            else:
+                self.conn.sendall(tosend)
+            data = self.conn.recv(1024)
+        except Exception as e:
+            print(e)
+            return False
         if not bytes and tosend == data.decode():
-            break
+            return True
         elif bytes and tosend == data:
-            break
+            return True
+        return False
 
+    def host_game(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(5)
+            s.bind((self.host, self.port))
+            s.listen()
+            try:
+                self.conn, addr = s.accept()
+                print('Connected by', addr)
+                self.conn.settimeout(5)
+                return True
+            except Exception as e:
+                print(e)
+                return False
 
-def host_game(HOST, PORT):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(1)
-        s.bind((HOST, PORT))
-        s.listen()
-        conn, addr = s.accept()
-        print('Connected by', addr)
-        conn.settimeout(5)
-        while listen(conn) != 'connecting':
-            pass
-        playername = listen(conn)
-        return playername, conn
-
-
-def connect(HOST, PORT, playername):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(5)
-    s.connect((HOST, PORT))
-    time.sleep(1)
-    send('connecting', s)
-    time.sleep(1)
-    send(playername, s)
-    return s
-
-
-if __name__ == '__main__':
-    HOST = '127.0.0.1'  # The server's hostname or IP address
-    PORT = 65432  # The port used by the server
-    host = connect(HOST, PORT, 'Maren')
-    print(listen(host))
-    print(listen(host))
+    def connect(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(5)
+        try:
+            s.connect((self.host, self.port))
+            self.conn = s
+            return True
+        except Exception as e:
+            print(e)
+            return False

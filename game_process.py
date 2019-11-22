@@ -163,7 +163,7 @@ class Joining(Game):
                 self.t = 0
         if self.state == 4:
             self.t += 1
-            if self.t == 200:
+            if self.t == 75:
                 print('> Returning playing')
                 return Playing()
         # Other event handling:
@@ -243,7 +243,7 @@ class Hosting(Game):
                 self.t = 0
         if self.state == 3:
             self.t += 1
-            if self.t == 200:
+            if self.t == 75:
                 return Playing()
         # Other event handling:
         for event in events:
