@@ -3,7 +3,7 @@ from multiprocessing import Pool
 
 
 def run(process):
-    os.system(f'C:/ProgramData/Anaconda3/python {process}')
+    os.system(f'C:/users/maren/Anaconda3/python {process}')
 
 
 if __name__ == '__main__':

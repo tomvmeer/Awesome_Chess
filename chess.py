@@ -21,6 +21,8 @@ class Grid:
         self.squares[-1][3] = 'wqueen' if team == 0 else 'bking'
         self.squares[-1][-4] = 'wking' if team == 0 else 'bqueen'
 
+        self.first_move = {'rook_left': True, 'rook_right': True, 'king': True}
+
     def show_moves(self, x, y):
         piece = self.squares[y][x][1:]
         if piece == 'pawn':  # Show moves for pawn:
@@ -265,6 +267,15 @@ class Grid:
                 break
         return success
 
+    def castling(self, oldx, oldy):
+        piece = self.squares[oldy][oldx][1:]
+        position = ''
+        if piece in ['rook', 'king']:
+            if oldx == 0:
+                position = '_left'
+            if oldx == 7:
+                position = '_right'
+
     def deselect(self):
         ''''Deselect all squares marked by prefix 's' or empty squares marked '-selected'.'''
         for y in range(8):
@@ -275,12 +286,21 @@ class Grid:
 
     def move(self, oldx, oldy, newx, newy):
         ''''Makes a move only if the new location is selected.'''
+        piece = self.squares[oldy][oldx][1:]
         if self.squares[newy][newx] is not None:
             if (self.squares[newy][newx] == '-selected' and self.squares[oldy][oldx] != '-selected') or \
                             self.squares[newy][newx][0] == 's':
                 self.squares[newy][newx] = self.squares[oldy][oldx]
                 self.deselect()
+                position = ''
+                if piece in ['rook', 'king']:
+                    if oldx == 0:
+                        position = '_left'
+                    if oldx == 7:
+                        position = '_right'
+                    self.first_move[piece + position] = False
                 self.squares[oldy][oldx] = None
+                print(self.first_move)
                 return True
         return False
 

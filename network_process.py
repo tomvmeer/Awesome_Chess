@@ -16,7 +16,7 @@ def get_status_from_game_process():
         return pickle.loads(f.read())
 
 
-dir = 'C:\\Users\\20173939\\Google Drive\\PycharmProjects\\Awesome_Chess'
+dir = 'C:/Users/maren/PycharmProjects/Awesome_Chess/'
 
 while True:
     old = os.listdir(dir)
