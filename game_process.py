@@ -12,7 +12,7 @@ import socket
 black = (0, 0, 0)
 gray = (169, 169, 169)
 white = (255, 255, 255)
-path = 'C:\\Users\\20173939\\Google Drive\\PycharmProjects\\Awesome_Chess\\'
+path = 'C:/Users/maren/PycharmProjects/Awesome_Chess/'
 i = [i for i in range(2) if f'data_{i}.dat' not in os.listdir(path)][0]
 
 
