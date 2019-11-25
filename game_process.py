@@ -289,7 +289,7 @@ class Playing(Game):
         self.turn = data['is_turn']
         self.team = data['team']
         self.player_name, self.opponent_name = data['player_name'], data['opponent_name']
-        self.game_grid = chess.Grid(self.team)
+        self.game_grid = chess.Grid(self.team, True)
         self.selected = False
         data['board'] = [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)]
         self.inform_network_process(data)

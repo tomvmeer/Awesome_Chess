@@ -3,7 +3,8 @@ import copy
 
 
 class Grid:
-    def __init__(self, team):
+    def __init__(self, team, main):
+        self.main = main
         self.team = team
         self.squares = [[None for i in range(8)] for i in range(8)]  # Create empty board.
         for i in range(8):  # Put pawns in place:
@@ -156,14 +157,16 @@ class Grid:
                                 self.squares[y + yi][x + xi][0] == 'w' and self.team == 1):
                             self.squares[y + yi][x + xi] = 's' + self.squares[y + yi][x + xi]
                             success = True
-            if len(self.castling()) > 0:
-                for direction in self.castling():
-                    if direction == 'left':
-                        self.squares[y][x - 2] = '-selected'
-                        success = True
-                    if direction == 'right':
-                        self.squares[y][x + 2] = '-selected'
-                        success = True
+            if self.main:
+                castle = self.castling()
+                if len(castle) > 0:
+                    for direction in castle:
+                        if direction == 'left':
+                            self.squares[y][x - 2] = '-selected'
+                            success = True
+                        if direction == 'right':
+                            self.squares[y][x + 2] = '-selected'
+                            success = True
 
             return success
 
@@ -302,7 +305,7 @@ class Grid:
             if left_unmoved == True and left_free == 0:
                 no_check = True
                 for x in range(1, 3):
-                    move_king = Grid(self.team)
+                    move_king = Grid(self.team, False)
                     move_king.squares = copy.deepcopy(self.squares)
                     move_king.squares[7][x] = move_king.squares[7][3]
                     move_king.squares[7][3] = None
@@ -315,7 +318,7 @@ class Grid:
             if right_unmoved == True and right_free == 0:
                 no_check = True
                 for x in range(4, 7):
-                    move_king = Grid(self.team)
+                    move_king = Grid(self.team, False)
                     move_king.squares = copy.deepcopy(self.squares)
                     move_king.squares[7][x] = move_king.squares[7][3]
                     move_king.squares[7][3] = None
@@ -337,7 +340,7 @@ class Grid:
             if left_unmoved == True and left_free == 0:
                 no_check = True
                 for x in range(1, 4):
-                    move_king = Grid(self.team)
+                    move_king = Grid(self.team, False)
                     move_king.squares = copy.deepcopy(self.squares)
                     move_king.squares[7][x] = move_king.squares[7][4]
                     move_king.squares[7][4] = None
@@ -350,7 +353,7 @@ class Grid:
             if right_unmoved == True and right_free == 0:
                 no_check = True
                 for x in range(5, 7):
-                    move_king = Grid(self.team)
+                    move_king = Grid(self.team, False)
                     move_king.squares = copy.deepcopy(self.squares)
                     move_king.squares[7][x] = move_king.squares[7][4]
                     move_king.squares[7][4] = None
@@ -465,7 +468,7 @@ class Grid:
     def highlight_moves(self, x, y):
         # Calculating highlighted square:
         opponent_team = 0 if self.team == 1 else 1
-        opponent_grid = Grid(opponent_team)
+        opponent_grid = Grid(opponent_team, False)
         opponent_grid.squares = [[k for k in reversed(i)] for i in reversed(self.squares)]
         if self.squares[y][x]:
             if ('b' == self.squares[y][x][0] and self.team == 0) or (
