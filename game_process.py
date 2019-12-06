@@ -20,7 +20,7 @@ i = [i for i in range(2) if f'data_{i}.dat' not in os.listdir(path)][0]
 class Game:
     def __init__(self):
         pygame.init()
-        self.display_width = 800
+        self.display_width = 1200
         self.display_height = 800
         self.display = pygame.display.set_mode((self.display_width, self.display_height))
         pygame.display.set_caption('Awesome Chess')
@@ -80,7 +80,7 @@ class Joining(Game):
         self.state = 0
         self.t = 0
         self.text_input = pygame_textinput.TextInput()
-        self.PORT = 65432
+        self.PORT = 80
         self.player_name, self.opponent_name = None, None
 
     def draw(self):
@@ -179,8 +179,8 @@ class Hosting(Game):
         self.state = 0  # 0: Entering player name, 1: Initializing host, 2: Waiting for players, 3: Launching game
         self.text_input = pygame_textinput.TextInput()
         self.t = 0
-        self.HOST = '127.0.0.1'
-        self.PORT = 65432
+        self.HOST = config.load_config('host_ip')
+        self.PORT = 80
         self.player_name, self.opponent_name = None, None
 
     def draw(self):
@@ -307,10 +307,11 @@ class Playing(Game):
             if event.type == pygame.MOUSEMOTION and not self.selected:
                 x, y = event.pos
                 x, y = x // 100, y // 100
-                if [x, y] != self.highlighted:
-                    self.highlighted = [x, y]
-                    self.game_grid.remove_highlight()
-                    self.game_grid.highlight_moves(x, y)
+                if x <= 7:
+                    if [x, y] != self.highlighted:
+                        self.highlighted = [x, y]
+                        self.game_grid.remove_highlight()
+                        self.game_grid.highlight_moves(x, y)
 
             if self.handle_quit(event):
                 return
@@ -319,29 +320,32 @@ class Playing(Game):
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.selected and event.button == 1:
                     x, y = event.pos
                     self.oldx, self.oldy = x // 100, y // 100
-                    if self.game_grid.squares[self.oldy][self.oldx]:
-                        if ('w' == self.game_grid.squares[self.oldy][self.oldx][0] and self.team == 0) or (
-                                        'b' == self.game_grid.squares[self.oldy][self.oldx][0] and self.team == 1):
-                            if self.game_grid.show_moves(self.oldx, self.oldy):
-                                self.selected = True
+                    if self.oldx <= 7:
+                        if self.game_grid.squares[self.oldy][self.oldx]:
+                            if ('w' == self.game_grid.squares[self.oldy][self.oldx][0] and self.team == 0) or (
+                                            'b' == self.game_grid.squares[self.oldy][self.oldx][0] and self.team == 1):
+                                if self.game_grid.show_moves(self.oldx, self.oldy):
+                                    self.selected = True
                 # Handling a click on a square to move a piece:
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.selected and event.button == 1:
                     x, y = event.pos
                     newx, newy = x // 100, y // 100
-                    if self.game_grid.move(self.oldx, self.oldy, newx, newy):
-                        self.selected = False
-                        self.turn = False
-                        print('> Turn is over')
-                        self.game_grid.check_check()
-                        data = {
-                            'is_turn': 'done',
-                            'team': self.team,
-                            'player_name': self.player_name,
-                            'opponent_name': self.opponent_name,
-                            'board': [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)],
-                            'state': 'connected'
-                        }
-                        self.inform_network_process(data)
+                    if newx <= 7:
+                        if self.game_grid.move(self.oldx, self.oldy, newx, newy):
+                            self.selected = False
+                            self.turn = False
+                            print('> Turn is over')
+                            self.game_grid.check_check()
+                            data = {
+                                'is_turn': 'done',
+                                'team': self.team,
+                                'player_name': self.player_name,
+                                'opponent_name': self.opponent_name,
+                                'board': [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)],
+                                'state': 'connected',
+                                'ghost': self.game_grid.ghost
+                            }
+                            self.inform_network_process(data)
                 # Handling a left click on a square to deselect.
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.selected and event.button == 3:
                     self.game_grid.deselect()
@@ -353,6 +357,8 @@ class Playing(Game):
                 print('> Update:', data)
                 self.turn = True
                 self.game_grid.squares = data['board']
+                x, y, piece = data['ghost']
+                self.game_grid.ghost = (abs(x - 7), abs(y - 7), piece)
                 self.game_grid.check_check()
 
 

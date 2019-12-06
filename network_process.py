@@ -125,7 +125,7 @@ while not crashed:
                 inform_game_process(data)
     elif data['state'] == 'connected':
         if data['is_turn'] == 'done':
-            while not connection.send(pickle.dumps(data['board']), bytes=True):
+            while not connection.send(pickle.dumps([data['board'], data['ghost']]), bytes=True):
                 data = get_status_from_game_process()
                 if data['state'] == 'quitting':
                     crashed = True
@@ -140,7 +140,7 @@ while not crashed:
                 received = connection.listen(bytes=True)
                 data = get_status_from_game_process()
                 if received != False:
-                    data['board'] = pickle.loads(received)
+                    data['board'], data['ghost'] = pickle.loads(received)
                     print('> Got new board')
                     data['is_turn'] = True
                     inform_game_process(data)
