@@ -24,6 +24,7 @@ class Grid:
         self.squares[-1][-4] = 'wking' if team == 0 else 'bqueen'
         self.highlighted = None
         self.checked = None
+        self.attacker = []
         self.ghost = None
         self.first_move = {'rook_left': True, 'rook_right': True, 'king': True}
 
@@ -389,7 +390,7 @@ class Grid:
                     self.first_move[piece + position] = False
                 self.ghost = (oldx, oldy, self.squares[oldy][oldx])
                 self.squares[oldy][oldx] = None
-                print('checking castling: ', oldx, newx, piece)
+                # print('checking castling: ', oldx, newx, piece)
                 if piece == 'king' and newx == oldx + 2:
                     self.squares[7][newx - 1] = self.squares[7][7]
                     self.squares[7][7] = None
@@ -450,7 +451,8 @@ class Grid:
         if self.ghost is not None:
             x, y, piece = self.ghost
             piece_img, width, height, sel, high = self.get_sprite(piece)
-            self.blit_alpha(gameDisplay, piece_img, (x*100 + (block_size - width) // 2, y*100 + (block_size - height) // 2), 50)
+            self.blit_alpha(gameDisplay, piece_img,
+                            (x * 100 + (block_size - width) // 2, y * 100 + (block_size - height) // 2), 50)
         for y in range(0, 800, block_size):
             xc = 0
             for x in range(0, 800, block_size):
@@ -502,6 +504,7 @@ class Grid:
 
     def check_check(self):
         self.checked = None
+        self.attacker = None
         for ys in range(8):
             for xs in range(8):
                 self.highlight_moves(xs, ys)
@@ -510,4 +513,74 @@ class Grid:
                     for x in range(8):
                         if self.squares[y][x] == 'h' + color + 'king':
                             self.checked = [y, x]
+                            self.attacker = [ys, xs]
                 self.remove_highlight()
+
+    def check_mate_king(self):
+        color = 'b' if self.team == 1 else 'w'
+        for y in range(8):
+            for x in range(8):
+                if self.squares[y][x]:
+                    if color + 'king' in self.squares[y][x]:
+                        kingx = x
+                        kingy = y
+                        break
+        temp_board = Grid(self.team, False)
+        temp_board.squares = [i.copy() for i in self.squares]
+        temp_board.deselect()
+        temp_board.show_moves(kingx, kingy)
+        for y in range(8):
+            for x in range(8):
+                if temp_board.squares[y][x]:
+                    if temp_board.squares[y][x] == '-selected' or temp_board.squares[y][x][0] == 's':
+                        temp_board2 = Grid(self.team, False)
+                        temp_board2.squares = [i.copy() for i in temp_board.squares]
+                        temp_board2.move(kingx, kingy, x, y)
+                        temp_board2.check_check()
+                        if not temp_board2.checked:
+                            return False
+        return True
+
+    def check_mate_block(self):
+        aty, atx = self.attacker
+        if 'knight' not in self.squares[aty][atx]:
+            color = 'b' if self.team == 1 else 'w'
+            for y in range(8):
+                for x in range(8):
+                    if self.squares[y][x]:
+                        if color + 'king' in self.squares[y][x]:
+                            kingx = x
+                            kingy = y
+                            break
+            if kingy == aty:
+                line = [[kingy, x] for x in range(min([atx, kingx]), max([atx, kingx]))]
+            elif kingx == atx:
+                line = [[y, kingx] for y in range(min([aty, kingy]), max([aty, kingy]))]
+            else:
+                line = [[y, x] for x, y in
+                        zip(range(min([atx, kingx]), max([atx, kingx])), range(min([aty, kingy]), max([aty, kingy])))]
+            if len(line) == 1:
+                line = []
+            else:
+                line = line[1:]
+        else:
+            line = []
+        print(line, self.attacker)
+        for ys in range(8):
+            for xs in range(8):
+                if self.squares[ys][xs]:
+                    color = 'b' if self.team == 1 else 'w'
+                    if self.squares[ys][xs][0] == color:
+                        self.show_moves(xs, ys)
+                        for y in range(8):
+                            for x in range(8):
+                                if self.squares[y][x]:
+                                    if ([y, x] in line and
+                                                self.squares[y][
+                                                    x] == '-selected' and 'king' not in self.squares[ys][xs]) or (
+                                            self.attacker == [y, x] and
+                                            self.squares[y][x][0] == 's'):
+                                        self.deselect()
+                                        return False
+                        self.deselect()
+        return True

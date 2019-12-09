@@ -296,9 +296,18 @@ class Playing(Game):
         self.display.fill(white)
         pygame.display.set_caption('Awesome Chess, player: ' + self.player_name)
         self.highlighted = None
+        self.check_for_mate = False
 
     def draw(self):
+        self.display.fill(white)
         self.game_grid.draw_board(self.display, self.display_width, self.display_height)
+        # Drawing text:
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        text = font.render(f'{self.opponent_name if not self.turn else self.player_name} "s turn', True, black)
+        textRect = text.get_rect()
+        xpos, ypos = 1000, 50
+        textRect.center = xpos, ypos
+        self.display.blit(text, textRect)
 
     def handle_events(self):
         events = pygame.event.get()
@@ -331,26 +340,49 @@ class Playing(Game):
                     x, y = event.pos
                     newx, newy = x // 100, y // 100
                     if newx <= 7:
+                        board_temp = [i.copy() for i in self.game_grid.squares]  # Temporary copy of board state.
+                        if self.game_grid.checked:
+                            checkpos_temp = self.game_grid.checked.copy()  # Temporary copy of king in check.
+                        else:
+                            checkpos_temp = None
                         if self.game_grid.move(self.oldx, self.oldy, newx, newy):
                             self.selected = False
                             self.turn = False
                             print('> Turn is over')
                             self.game_grid.check_check()
-                            data = {
-                                'is_turn': 'done',
-                                'team': self.team,
-                                'player_name': self.player_name,
-                                'opponent_name': self.opponent_name,
-                                'board': [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)],
-                                'state': 'connected',
-                                'ghost': self.game_grid.ghost
-                            }
-                            self.inform_network_process(data)
+                            if self.game_grid.checked:  # If the move results in check.
+                                self.turn = True  # Allow extra turn.
+                                self.game_grid.squares = board_temp  # Reset board to pre-move state.
+                                self.game_grid.deselect()  # Deselect previous piece.
+                                self.game_grid.checked = checkpos_temp  # Reset check position to pre-move state.
+                                print('Move results in check!')
+                            if not self.turn:  # If the above did not apply, continue as usual:
+                                data = {
+                                    'is_turn': 'done',
+                                    'team': self.team,
+                                    'player_name': self.player_name,
+                                    'opponent_name': self.opponent_name,
+                                    'board': [[k for k in reversed(i)] for i in reversed(self.game_grid.squares)],
+                                    'state': 'connected',
+                                    'ghost': self.game_grid.ghost
+                                }
+                                self.inform_network_process(data)
                 # Handling a left click on a square to deselect.
                 elif event.type == pygame.MOUSEBUTTONDOWN and self.selected and event.button == 3:
                     self.game_grid.deselect()
                     self.selected = False
         # Handling network driven events:
+        if self.turn:
+            if self.game_grid.checked and not self.check_for_mate:
+                print('> In check, checking for mate.')
+                movemate = self.game_grid.check_mate_king()
+                blockmate = self.game_grid.check_mate_block()
+                print(movemate, blockmate)
+                # Check for check-mate:
+                if movemate and blockmate:
+                    print('Checkmate!')
+                    return Waiting()
+                self.check_for_mate = True
         if not self.turn:
             data = self.get_status_from_network_process()
             if data['is_turn'] is True:
@@ -360,6 +392,7 @@ class Playing(Game):
                 x, y, piece = data['ghost']
                 self.game_grid.ghost = (abs(x - 7), abs(y - 7), piece)
                 self.game_grid.check_check()
+                self.check_for_mate = False
 
 
 game = Waiting()
