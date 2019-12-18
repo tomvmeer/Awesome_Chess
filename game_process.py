@@ -297,6 +297,7 @@ class Playing(Game):
         pygame.display.set_caption('Awesome Chess, player: ' + self.player_name)
         self.highlighted = None
         self.check_for_mate = False
+        self.msg = None
 
     def draw(self):
         self.display.fill(white)
@@ -308,6 +309,15 @@ class Playing(Game):
         xpos, ypos = 1000, 50
         textRect.center = xpos, ypos
         self.display.blit(text, textRect)
+
+        if self.msg:
+            # Drawing text:
+            font = pygame.font.Font('freesansbold.ttf', 32)
+            text = font.render(self.msg, True, black)
+            textRect = text.get_rect()
+            xpos, ypos = 1000, 80
+            textRect.center = xpos, ypos
+            self.display.blit(text, textRect)
 
     def handle_events(self):
         events = pygame.event.get()
@@ -349,13 +359,14 @@ class Playing(Game):
                             self.selected = False
                             self.turn = False
                             print('> Turn is over')
+                            self.msg = None
                             self.game_grid.check_check()
                             if self.game_grid.checked:  # If the move results in check.
                                 self.turn = True  # Allow extra turn.
                                 self.game_grid.squares = board_temp  # Reset board to pre-move state.
                                 self.game_grid.deselect()  # Deselect previous piece.
                                 self.game_grid.checked = checkpos_temp  # Reset check position to pre-move state.
-                                print('Move results in check!')
+                                self.msg = 'Move results in check!'
                             if not self.turn:  # If the above did not apply, continue as usual:
                                 data = {
                                     'is_turn': 'done',

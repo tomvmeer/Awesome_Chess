@@ -160,15 +160,15 @@ class Grid:
                             success = True
             if self.main:
                 castle = self.castling()
-                if len(castle) > 0:
-                    for direction in castle:
-                        if direction == 'left':
-                            self.squares[y][x - 2] = '-selected'
-                            success = True
-                        if direction == 'right':
-                            self.squares[y][x + 2] = '-selected'
-                            success = True
-
+                if not self.checked:
+                    if len(castle) > 0:
+                        for direction in castle:
+                            if direction == 'left':
+                                self.squares[y][x - 2] = '-selected'
+                                success = True
+                            if direction == 'right':
+                                self.squares[y][x + 2] = '-selected'
+                                success = True
             return success
 
     def bishop_check(self, x, y):
@@ -557,8 +557,9 @@ class Grid:
             elif kingx == atx:
                 line = [[y, kingx] for y in range(min([aty, kingy]), max([aty, kingy]))]
             else:
-                line = [[y, x] for x, y in
-                        zip(range(min([atx, kingx]), max([atx, kingx])), range(min([aty, kingy]), max([aty, kingy])))]
+                stepy = -1 if kingy - aty > 0 else 1
+                stepx = -1 if kingx - atx > 0 else 1
+                line = [[y, x] for y, x in zip(range(aty, kingy, stepy), range(atx, kingx, stepx))]
             if len(line) == 1:
                 line = []
             else:
@@ -578,8 +579,8 @@ class Grid:
                                     if ([y, x] in line and
                                                 self.squares[y][
                                                     x] == '-selected' and 'king' not in self.squares[ys][xs]) or (
-                                            self.attacker == [y, x] and
-                                            self.squares[y][x][0] == 's'):
+                                                    self.attacker == [y, x] and
+                                                    self.squares[y][x][0] == 's'):
                                         self.deselect()
                                         return False
                         self.deselect()
